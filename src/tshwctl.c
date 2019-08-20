@@ -29,8 +29,8 @@ int get_model()
 
 	proc = fopen("/proc/device-tree/model", "r");
 	if (!proc) {
-	    perror("model");
-	    return 0;
+		perror("Unable to open model file");
+		return 0;
 	}
 	fread(mdl, 256, 1, proc);
 	ptr = strstr(mdl, "TS-");
@@ -87,7 +87,7 @@ int main(int argc, char **argv)
 
 	if(argc == 1) {
 		usage(argv);
-		return(1);
+		return 1;
 	}
 
 	model = get_model();
