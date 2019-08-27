@@ -1,0 +1,77 @@
+#!/bin/sh
+
+# SPDX-License-Identifier: BSD-2-Clause
+# Copyright (c) 2019 - Technologic Systems Inc.
+
+# Outputs "splash.out" in current directory that is a 240x320 RGB 565 raw image
+# suitable for TS-7100 LCD splash screen loading.
+#
+# Examples:
+#  splash -rotate 90 foo.jpg
+#  splash -background white logo.png
+#  splash -resize 100x100 -background blue logo.bmp
+
+if [ $# -lt 1 ]; then
+  echo "Usage: $0 [-background COLOR] [-resize GEOM] some-image-file-name" >&2
+  echo "Tool to manipulate and format images for use with TS LCD splash" >&2
+  echo "  screens using SPI NOR flash" >&2
+  echo "" >&2
+  echo "  COLOR defaults to \"black\" and GEOM defaults to \"240x320\"" >&2
+  echo "  Requires 'convert' and 'gcc' commands to be in current \$PATH" >&2
+  echo "    in environment for proper operation" >&2
+  exit 1
+fi
+
+command -v convert >/dev/null 2>&1
+if [ $? -ne 0 ]; then
+  echo "$0: imagemagick 'convert' utility is required" >&2
+  exit 1
+fi
+command -v gcc >/dev/null 2>&1
+if [ $? -ne 0 ]; then
+  echo "$0: C compiler 'gcc' is required" >&2
+  exit 1
+fi
+
+background="-background black"
+resize="-resize 240x320"
+convert_args=""
+for I in "${@}"; do
+  if [ ! "$background" ]; then background="-background $I";
+  elif [ ! "$resize" ]; then resize="-resize $I"; 
+  else case ${I} in
+    -background)
+      background=""
+      ;;
+    -resize)
+      resize=""
+      ;;
+    *)
+      convert_args="$convert_args $I"
+    esac
+  fi
+done
+
+TMPF=$(mktemp)
+convert ${convert_args} ${resize} ${background} -compose Over -gravity center -extent 240x320 -depth 8 splash.png
+convert ${convert_args} ${resize} ${background} -compose Over -gravity center -extent 240x320 -depth 8 rgb:${TMPF}
+
+cat<<EOF >"$TMPF".c
+#include <stdio.h>
+int main(void) {
+  unsigned char c[3];
+  unsigned short p;
+  while (1) {
+    if (fread(&c, 3, 1, stdin) != 1) break;
+    p = (((c[0] >> 3) << 11) | ((c[1] >> 2) << 5) | (c[2] >> 3));
+    putchar(p>>8);
+    putchar(p&0xff);
+  } 
+}
+EOF
+    
+gcc -o "$TMPF".out "$TMPF".c
+"$TMPF".out <"$TMPF" >splash.out
+rm "$TMPF".c "$TMPF".out "$TMPF"
+echo "splash.png: standard image file for splash mockup"
+echo "splash.out: raw binary RGB565 pixels, big-endian byte ordering"
