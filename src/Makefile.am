@@ -1,6 +1,6 @@
 GITCOMMIT:= $(shell git describe --abbrev=12 --dirty --always)
 
-tsmicroctl_SOURCES = tsmicroctl.c
+tsmicroctl_SOURCES = tsmicroctl.c microcontroller.c
 tsmicroctl_CFLAGS = -Wall -fno-tree-cselim
 tsmicroctl_CPPFLAGS = -DCTL -DGITCOMMIT="\"${GITCOMMIT}\""
 
