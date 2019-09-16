@@ -146,7 +146,7 @@ void print_info()
 	/* The default state of the TS-SILO caps at power on. When enabled, the
 	 * caps are by default charged at the default charge current.
 	 */
-	printf("SILO_DEFAULT=");
+	printf("SILO_DEF=");
 	if (buf_8[FLAG_REG] & FLAG_DEF_SILO_EN) printf("enabled\n");
 	else printf("disabled\n");
 
@@ -160,7 +160,7 @@ void print_info()
 	/* The default charge current of the caps at boot, can be modified to
 	 * change future boots. Represented in mA.
 	 */
-	printf("SILO_CHARGE_CUR_DEF=%d\n",
+	printf("SILO_DEF_CHARGE_CUR=%d\n",
 	  ((uint16_t)(buf_8[SILO_DEF_CHRG_CUR_16] << 8) |
 	  buf_8[(SILO_DEF_CHRG_CUR_16 + 1)]));
 
