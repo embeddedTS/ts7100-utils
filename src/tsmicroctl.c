@@ -92,7 +92,7 @@ uint16_t calc_silo_pct(uint16_t silo_tot_mv)
 void print_info()
 {
 	int i;
-	uint8_t buf_8[28];
+	uint8_t buf_8[REG_LEN], build_str[80];
 	uint32_t wdt_ms;
 	uint16_t *buf_16 = (uint16_t *)buf_8;
 
@@ -102,15 +102,24 @@ void print_info()
 	 * its value. Not every channel is used on every SBC.
 	 */
 	const char *an_names[(ADC_LEN/2)] = {
-	  "MV5", "MV_SILO_CHARGE", "MV3P3", "MVIN", "", "", "", "MV_SILO",
-	  "MV_SILO_TOT", "", ""};
+	  "MV5", "MV_SILO_CHARGE", "MV3P3", "MVIN", "INIT_TEMP", "", "",
+	  "MV_SILO", "MV_SILO_TOT", "", "CUR_TEMP"};
 
 	/* XXX: Check return val! */
+	silab_peekstream8(BUILD_STR_START, build_str, BUILD_STR_LEN);
 	silab_peekstream8(REG_START, buf_8, REG_LEN);
+
 	/* Convert 8bit vals to 16bit
-	 * NOTE: All curent uC implementations put the MSB of the 16-bit value
+	 *
+	 * NOTES:
+	 * All curent uC implementations put the MSB of the 16-bit value
 	 * in the lower I2C register. This may not be true on all
-	 * implementations. Use caution when porting.
+	 * implementations.
+	 *
+	 * This also assumes that ADC_START to ADC_LEN is between REG_START and
+	 * REG_LEN, inclusive.
+	 *
+	 * Use caution when porting.
 	 */
 	for (i = ADC_START; i < ((ADC_LEN/2) + ADC_START); i++) {
 		buf_16[i] =
@@ -118,6 +127,7 @@ void print_info()
 	}
 
 	printf("REVISION=0x%x\n", silab_peek8(REV_REG));
+	printf("BUILD_STR=\'%s\'\n", build_str);
 
 	/* Print analog values, names are set above */
 	for (i = ADC_START; i < ((ADC_LEN/2) + ADC_START); i++) {
@@ -126,7 +136,6 @@ void print_info()
 		}
 	}
 
-	printf("TEMPERATURE=%d\n", buf_16[10]);
 	printf("USB_CONN_CONNECTED=%d\n", !!(buf_8[CTRL_REG] & CTRL_USB_CONN));
 
 	/* The statement ordering is important! Need to check in order

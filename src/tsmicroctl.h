@@ -5,7 +5,7 @@
 #define	I2C_BUS			"/dev/i2c-0"
 
 #define	REG_START		0
-#define	REG_LEN			28
+#define	REG_LEN			27
 
 #define	ADC_START		0
 #define	ADC_LEN			22
@@ -41,6 +41,9 @@
 #define	WDT_CTRL_FEED		(1 << 0) // Feed for TIMEOUT length
 #define	WDT_CTRL_REBOOTED	(1 << 7) // Set if last uC reboot caused by WDT
 
-#define	REV_REG			0xFFFF
+#define	BUILD_STR_START		0x1000
+#define	BUILD_STR_LEN		80
+
+#define	REV_REG			0x800
 
 #endif
