@@ -77,6 +77,7 @@ void set_silo(int opt_silo)
  * difference between min and max charge is 1170 mV, multiply up and divide out
  * this difference to get a 0-100 scale.
  */
+/* TODO: Move this to a more tunable thing in the .h file */
 uint16_t calc_silo_pct(uint16_t silo_tot_mv)
 {
 	int16_t pct;
@@ -126,7 +127,7 @@ void print_info()
 		  ((uint16_t)(buf_8[(i << 1)] << 8) | buf_8[((i << 1)|1)]);
 	}
 
-	printf("REVISION=0x%x\n", silab_peek8(REV_REG));
+	printf("UC_REV=0x%x\n", silab_peek8(REV_REG));
 	printf("BUILD_STR=\'%s\'\n", build_str);
 
 	/* Print analog values, names are set above */
