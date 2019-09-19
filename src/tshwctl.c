@@ -42,11 +42,11 @@ void do_info(void)
 	fpga_init(0x50004000);
 	eval_cmd_init();
 
-	printf("model=%X\n", get_model());
-	printf("fpga_rev=0x%X\n", fpeek32(0x0));
-	printf("cpu_opts=0x%X\n", eval_cmd("cpu_opts"));
-	printf("io_opts=0x%X\n", eval_cmd("io_opts"));
-	printf("io_model=0x%X\n", eval_cmd("io_model"));
+	printf("MODEL=%X\n", get_model());
+	printf("FPGA_REV=0x%X\n", fpeek32(0x0));
+	printf("CPU_OPTS=0x%X\n", eval_cmd("cpu_opts"));
+	printf("IO_OPTS=0x%X\n", eval_cmd("io_opts"));
+	printf("IO_MODEL=0x%X\n", eval_cmd("io_model"));
 }
 
 static void usage(char **argv) {
