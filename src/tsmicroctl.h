@@ -5,7 +5,7 @@
 #define	I2C_BUS			"/dev/i2c-0"
 
 #define	REG_START		0
-#define	REG_LEN			27
+#define	REG_LEN			28
 
 #define	ADC_START		0
 #define	ADC_LEN			22
