@@ -176,6 +176,8 @@ void print_info()
 
 	printf("WDT_STATUS=%s\n", (buf_8[CTRL_REG] & CTRL_WDT_EN) ?
 	  "armed" : "disabled");
+	printf("WDT_DEF_STATUS=%s\n", (buf_8[FLAG_REG] & FLAG_DEF_WDT_EN) ?
+	  "disabled" : "armed");
 
 	/* WDT has another set of regs associated with it. Clobber existing
 	 * buf_8 values, no longer needed. Timer value is stored in uC with
@@ -183,8 +185,9 @@ void print_info()
 	 *
 	 * NOTE:
 	 * Most instances of this uC layout should be using 4, 8-bit regs for
-	 * a 32-bit value represented in ms. This code will readily accommodate
-	 * less, but will require changes to support more than 32-bit values.
+	 * a 32-bit value representing centiseconds of time. This code will
+	 * readily accommodate a shorter bit value, but will require changes to
+	 * support more than 32-bit values.
 	 */
 	/* XXX: Check return val! */
 	silab_peekstream8(WDT_TIMEOUT, buf_8, WDT_LEN);
@@ -192,6 +195,7 @@ void print_info()
 	for (i = 0; i < WDT_LEN; i++) {
 		wdt_ms |= (uint32_t)(buf_8[i] << (8 * i));
 	}
+	/* WDT time is stored in centisecond granularity */
 	wdt_ms *= 10;
 	printf("WDT_TIMEOUT_LEN=%d\n", wdt_ms);
 	printf("REBOOT_SOURCE=%s\n",
@@ -216,7 +220,11 @@ static void usage(char **argv) {
 	  "  -E, --def-tssiloon       Enable auto TS-SILO charging at poweron\n"
 	  "  -D, --def-tssilooff      Disable auto TS-SILO charging at poweron\n"
 	  "  -C, --def-tssilocur=<mA> Set TS-SILO auto charge current in mA\n"
-	  "  -w, --tssilowait=<pct>   Block until TS-SILO is <pct> charged\n"
+	  "  -w, --tssilowait=<pct>   Block until TS-SILO is <pct> charged\n\n"
+
+	  " Watchdog Timer Options:\n"
+	  "  -a, --def-wdton          Arm WDT for 600 s at poweron\n"
+	  "  -A, --def-wdtoff         Disarm WDT at poweron\n"
 	  "\n",
 	  copyright, argv[0]
 	);
@@ -228,6 +236,8 @@ int main(int argc, char **argv)
 	int opt_silo = 0, opt_def_silo = 0;
 	int opt_silo_cur = 0, opt_def_silo_cur = 0;
 	int opt_silo_wait = 0;
+	int opt_def_wdt = 0;
+	uint8_t buf;
 
 	static struct option long_options[] = {
 	  { "info",		no_argument, 		0, 'i' },
@@ -239,6 +249,8 @@ int main(int argc, char **argv)
 	  { "def-tssilooff",	no_argument,		0, 'D' },
 	  { "def-tssilocur",	required_argument,	0, 'C' },
 	  { "tssilowait",	required_argument,	0, 'w' },
+	  { "def-wdton",	no_argument,		0, 'a' },
+	  { "def-wdtoff",	no_argument,		0, 'A' },
 	  { 0, 0, 0, 0 }
 	};
 
@@ -262,7 +274,7 @@ int main(int argc, char **argv)
 	}
 
 	while((c = getopt_long(argc, argv, 
-	  "ihedc:EDC:w:",
+	  "ihedc:EDC:w:aA",
 	  long_options, NULL)) != -1) {
 		switch (c) {
 		  case 'i': /* Info */
@@ -291,6 +303,12 @@ int main(int argc, char **argv)
 			if (opt_silo_wait > 100) opt_silo_wait = 100;
 			if (opt_silo_wait < 0) opt_silo_wait = 0;
 			break;
+		  case 'a': /* Enable WDT at poweron */
+			opt_def_wdt = enable;
+			break;
+		  case 'A': /* Disable WDT at poweron */
+			opt_def_wdt = disable;
+			break;
 		  case 'h':
 		  default:
 			usage(argv);
@@ -313,8 +331,6 @@ int main(int argc, char **argv)
 	 * Default TS-SILO Settings
 	 ************************/
 	if (opt_def_silo) {
-		uint8_t buf;
-
 		buf = silab_peek8(FLAG_REG);
 
 		if (opt_def_silo == enable) buf |= (FLAG_DEF_SILO_EN);
@@ -340,8 +356,19 @@ int main(int argc, char **argv)
 		}
 	}
 
+	/************************
+	 * Default WDT Settings
+	 ***********************/
+	if (opt_def_wdt) {
+		buf = silab_peek8(FLAG_REG);
 
-	
+		if (opt_def_wdt == enable) buf &= ~(FLAG_DEF_WDT_EN);
+		if (opt_def_wdt == disable) buf |= (FLAG_DEF_WDT_EN);
+
+		silab_poke8(FLAG_REG, buf);
+	}
+
+
 	return 0;
 }
 

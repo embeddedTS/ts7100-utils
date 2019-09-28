@@ -31,6 +31,7 @@
 
 #define	FLAG_REG		23
 #define	FLAG_DEF_SILO_EN	(1 << 0) // When set, auto-charge SILO at pwron
+#define	FLAG_DEF_WDT_EN		(1 << 1) // When clr, WDT armed for 600s @ pwron
 
 #define	SILO_DEF_CHRG_CUR_16	24
 #define	SILO_CHRG_CUR_16	26
