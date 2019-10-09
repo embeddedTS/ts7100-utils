@@ -3,7 +3,7 @@
 
 AC_PREREQ([2.69])
 AC_INIT(ts7100-utils, 1.0, support@embeddedarm.com)
-AC_CONFIG_SRCDIR([src/tsmicroctl.c])
+AC_CONFIG_SRCDIR([src/tshwctl.c])
 
 AM_INIT_AUTOMAKE([1.00 foreign no-define])
 
