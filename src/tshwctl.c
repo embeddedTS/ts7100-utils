@@ -15,38 +15,26 @@
 #include <unistd.h>
 #include "eval_cmdline.h"
 #include "fpga.h"
+#include "helpers.h"
 
 const char copyright[] = "Copyright (c) Technologic Systems - " __DATE__ " - "
   GITCOMMIT;
 
 int model = 0;
 
-int get_model()
-{
-	FILE *proc;
-	char mdl[256];
-	char *ptr;
-
-	proc = fopen("/proc/device-tree/model", "r");
-	if (!proc) {
-		perror("Unable to open model file");
-		return 0;
-	}
-	fread(mdl, 256, 1, proc);
-	ptr = strstr(mdl, "TS-");
-	return strtoull(ptr+3, NULL, 16);
-}
-
 void do_info(void)
 {
 	fpga_init(0x50004000);
 	eval_cmd_init();
 
-	printf("MODEL=%X\n", get_model());
+	printf("MODEL=%X\n", model);
 	printf("FPGA_REV=0x%X\n", fpeek32(0x0));
-	printf("CPU_OPTS=0x%X\n", eval_cmd("cpu_opts"));
-	printf("IO_OPTS=0x%X\n", eval_cmd("io_opts"));
-	printf("IO_MODEL=0x%X\n", eval_cmd("io_model"));
+
+	if(model == 0x7100) {
+		printf("CPU_OPTS=0x%X\n", eval_cmd("cpu_opts"));
+		printf("IO_OPTS=0x%X\n", eval_cmd("io_opts"));
+		printf("IO_MODEL=0x%X\n", eval_cmd("io_model"));
+	}
 }
 
 static void usage(char **argv) {
@@ -93,6 +81,7 @@ int main(int argc, char **argv)
 	model = get_model();
 	switch(model) {
 	  case 0x7100:
+	  case 0x7250:
 		break;
 	  default:
 		fprintf(stderr, "Unsupported model TS-%x\n", model);
