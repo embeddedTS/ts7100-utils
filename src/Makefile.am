@@ -10,7 +10,10 @@ tshwctl_CPPFLAGS = -DGITCOMMIT="\"${GITCOMMIT}\""
 lcdmesg_SOURCES = lcdmesg.c helpers.c
 lcdmesg_CFLAGS = -lgpiod -Wall
 
+keypad_SOURCES = keypad.c helpers.c
+keypad_CFLAGS = -lgpiod -Wall
+
 pc104_peekpoke_SOURCES = pc104_peekpoke.c helpers.c pc104.c
 pc104_peekpoke_CFLAGS = -Wall
 
-bin_PROGRAMS = silabs tshwctl lcdmesg pc104_peekpoke
+bin_PROGRAMS = silabs tshwctl lcdmesg pc104_peekpoke keypad
