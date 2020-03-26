@@ -4,6 +4,7 @@
 #include <stdint.h>
 
 void pc104_init(void);
+void *pc104_mmap_init();
 
 void pc104_io_8_write(uint16_t addr, uint8_t val);
 void pc104_io_16_write(uint16_t addr, uint16_t val);
