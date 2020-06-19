@@ -34,6 +34,13 @@ void do_info(void)
 		printf("CPU_OPTS=0x%X\n", eval_cmd("cpu_opts"));
 		printf("IO_OPTS=0x%X\n", eval_cmd("io_opts"));
 		printf("IO_MODEL=0x%X\n", eval_cmd("io_model"));
+	} else if(model == 0x7250) {
+		printf("MODEL_OPTS=0x%X\n", (fpeek32(0x10) >> 16) & 0x3F);
+		if(fpeek32(0x10) & 0x10000)
+			printf("RAM_MB=512\n");
+		else
+			printf("RAM_MB=1024\n");
+		printf("PCBREV=A\n");
 	}
 }
 
