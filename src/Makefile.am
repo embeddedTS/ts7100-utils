@@ -7,7 +7,7 @@ tshwctl_SOURCES = tshwctl.c fpga.c eval_cmdline.c helpers.c
 tshwctl_CFLAGS = -Wall -fno-tree-cselim
 tshwctl_CPPFLAGS = -DGITCOMMIT="\"${GITCOMMIT}\""
 
-lcdmesg_SOURCES = lcdmesg.c helpers.c
+lcdmesg_SOURCES = lcdmesg.c helpers.c fpga.c
 lcdmesg_CFLAGS = -lgpiod -Wall
 
 keypad_SOURCES = keypad.c helpers.c

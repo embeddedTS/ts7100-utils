@@ -10,6 +10,7 @@
 #include <time.h>
 #include <unistd.h>
 #include "helpers.h"
+#include "fpga.h"
 
 #define CONSUMER "lcdmesg"
 
@@ -79,28 +80,11 @@ void lcd_write(struct hd44780 *lcd, uint8_t rs, uint8_t data)
 	usleep(37);
 }
 
-/* Duty cycle is 0-1000 with 0 being 100% */
-void lcd_contrast(int duty)
+/* Set a contrast (duty cycle) from 0 (off) to 15 (max).
+ * This may need to change depending on the LCD used or the altitude */
+void lcd_contrast(uint8_t duty)
 {
-	int fd;
-	char val[32];
-
-	fd = open("/sys/class/pwm/pwmchip0/export", O_WRONLY);
-	write(fd, "0", 2);
-	close(fd);
-
-	fd = open("/sys/class/pwm/pwmchip0/pwm0/period", O_WRONLY);
-	write(fd, "1000", 5); /* 1MHz */
-	close(fd);
-
-	fd = open("/sys/class/pwm/pwmchip0/pwm0/duty_cycle", O_WRONLY);
-	snprintf(val, 31, "%d", duty);
-	write(fd, val, strlen(val));
-	close(fd);
-
-	fd = open("/sys/class/pwm/pwmchip0/pwm0/enable", O_WRONLY);
-	write(fd, "1", 2);
-	close(fd);
+	fpoke32(0x1c, duty & 0xf);
 }
 
 void lcd_writechars(struct hd44780 *lcd, char *dat)
@@ -135,7 +119,7 @@ void lcd_init(struct hd44780 *lcd)
 		assert(!ret);
 		lcd->en = gpiod_chip_get_line(lcd->chip, 20);
 		assert(lcd->en);
-		lcd->rs = gpiod_chip_get_line(lcd->chip, 23);
+		lcd->rs = gpiod_chip_get_line(lcd->chip, 21);
 		assert(lcd->rs);
 		lcd->wr = gpiod_chip_get_line(lcd->chip, 19);
 		assert(lcd->wr);
@@ -143,6 +127,8 @@ void lcd_init(struct hd44780 *lcd)
 		fprintf(stderr, "Unsupported model 0x%X\n", model);
 		exit(1);
 	}
+
+	fpga_init(0x50004000);
 
 	/* Initialize all IO as high */
 	ret = gpiod_line_request_bulk_output(&lcd->data, CONSUMER, NULL);
@@ -186,7 +172,8 @@ void lcd_init(struct hd44780 *lcd)
 	 */
 	lcd_returnhome(lcd);
 
-	lcd_contrast(200);
+
+	lcd_contrast(12);
 }
 
 int main(int argc, char **argv)
