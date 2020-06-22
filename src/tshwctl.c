@@ -35,7 +35,7 @@ void do_info(void)
 		printf("IO_OPTS=0x%X\n", eval_cmd("io_opts"));
 		printf("IO_MODEL=0x%X\n", eval_cmd("io_model"));
 	} else if(model == 0x7250) {
-		printf("MODEL_OPTS=0x%X\n", (fpeek32(0x10) >> 16) & 0x3F);
+		printf("MODEL_OPTS=0x%X\n", (~fpeek32(0x10) >> 17) & 0x1F);
 		if(fpeek32(0x10) & 0x10000)
 			printf("RAM_MB=512\n");
 		else
