@@ -28,7 +28,7 @@ void do_info(void)
 	eval_cmd_init();
 
 	printf("MODEL=%X\n", model);
-	printf("FPGA_REV=0x%X\n", fpeek32(0x0));
+	printf("FPGA_REV=0x%X\n", fpeek32(0x0) >> 16);
 
 	if(model == 0x7100) {
 		printf("CPU_OPTS=0x%X\n", eval_cmd("cpu_opts"));
