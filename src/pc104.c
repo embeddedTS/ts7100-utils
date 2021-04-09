@@ -41,7 +41,7 @@ void pc104_init(void)
 	assert(mem16altfd != -1);
 }
 
-uint8_t pc104_io_8_read(uint16_t addr)
+uint8_t pc104_io_8_read(uint32_t addr)
 {
 	uint8_t val;
 	int ret;
@@ -55,7 +55,7 @@ uint8_t pc104_io_8_read(uint16_t addr)
 	return val;
 }
 
-void pc104_io_8_write(uint16_t addr, uint8_t val)
+void pc104_io_8_write(uint32_t addr, uint8_t val)
 {
 	int ret;
 
@@ -66,7 +66,7 @@ void pc104_io_8_write(uint16_t addr, uint8_t val)
 	assert(ret == 1);
 }
 
-uint16_t pc104_io_16_read(uint16_t addr)
+uint16_t pc104_io_16_read(uint32_t addr)
 {
 	uint16_t val;
 	int ret;
@@ -80,7 +80,7 @@ uint16_t pc104_io_16_read(uint16_t addr)
 	return val;
 }
 
-void pc104_io_16_write(uint16_t addr, uint16_t val)
+void pc104_io_16_write(uint32_t addr, uint16_t val)
 {
 	int ret;
 
@@ -91,7 +91,7 @@ void pc104_io_16_write(uint16_t addr, uint16_t val)
 	assert(ret == 2);
 }
 
-uint16_t pc104_io_16_alt_read(uint16_t addr)
+uint16_t pc104_io_16_alt_read(uint32_t addr)
 {
 	uint16_t val;
 	int ret;
@@ -105,7 +105,7 @@ uint16_t pc104_io_16_alt_read(uint16_t addr)
 	return val;
 }
 
-void pc104_io_16_alt_write(uint16_t addr, uint16_t val)
+void pc104_io_16_alt_write(uint32_t addr, uint16_t val)
 {
 	int ret;
 
@@ -116,7 +116,7 @@ void pc104_io_16_alt_write(uint16_t addr, uint16_t val)
 	assert(ret == 2);
 }
 
-uint8_t pc104_mem_8_read(uint16_t addr)
+uint8_t pc104_mem_8_read(uint32_t addr)
 {
 	uint8_t val;
 	int ret;
@@ -130,7 +130,7 @@ uint8_t pc104_mem_8_read(uint16_t addr)
 	return val;
 }
 
-void pc104_mem_8_write(uint16_t addr, uint8_t val)
+void pc104_mem_8_write(uint32_t addr, uint8_t val)
 {
 	int ret;
 
@@ -141,7 +141,7 @@ void pc104_mem_8_write(uint16_t addr, uint8_t val)
 	assert(ret == 1);
 }
 
-uint16_t pc104_mem_16_read(uint16_t addr)
+uint16_t pc104_mem_16_read(uint32_t addr)
 {
 	uint16_t val;
 	int ret;
@@ -155,7 +155,7 @@ uint16_t pc104_mem_16_read(uint16_t addr)
 	return val;
 }
 
-void pc104_mem_16_write(uint16_t addr, uint16_t val)
+void pc104_mem_16_write(uint32_t addr, uint16_t val)
 {
 	int ret;
 
@@ -166,7 +166,7 @@ void pc104_mem_16_write(uint16_t addr, uint16_t val)
 	assert(ret == 2);
 }
 
-uint16_t pc104_mem_16_alt_read(uint16_t addr)
+uint16_t pc104_mem_16_alt_read(uint32_t addr)
 {
 	uint16_t val;
 	int ret;
@@ -180,7 +180,7 @@ uint16_t pc104_mem_16_alt_read(uint16_t addr)
 	return val;
 }
 
-void pc104_mem_16_alt_write(uint16_t addr, uint16_t val)
+void pc104_mem_16_alt_write(uint32_t addr, uint16_t val)
 {
 	int ret;
 
