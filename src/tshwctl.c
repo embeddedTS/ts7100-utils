@@ -28,14 +28,23 @@ void do_info(void)
 	eval_cmd_init();
 
 	printf("MODEL=%X\n", model);
-	printf("FPGA_REV=0x%X\n", fpeek32(0x0) >> 16);
 
 	if(model == 0x7100) {
+		printf("FPGA_REV=0x%X\n", fpeek32(0x0) >> 16);
 		printf("CPU_OPTS=0x%X\n", eval_cmd("cpu_opts"));
 		printf("IO_OPTS=0x%X\n", eval_cmd("io_opts"));
 		printf("IO_MODEL=0x%X\n", eval_cmd("io_model"));
 	} else if(model == 0x7250) {
-		printf("MODEL_OPTS=0x%X\n", (~fpeek32(0x10) >> 17) & 0x1F);
+		uint32_t fpga_rev = fpeek32(0x0);
+		uint32_t fpga_hash = fpeek32(0x4);
+		printf("FPGA_REV=%d\n", fpga_rev & 0x7fffffff);
+
+		if(fpga_rev & (1 << 31))
+			printf("FPGA_HASH=\"%x-dirty\"\n", fpga_hash);
+		else
+			printf("FPGA_HASH=\"%x\"\n", fpga_hash);
+
+		printf("OPTS=0x%X\n", fpeek32(0x8) & 0xF);
 		if(fpeek32(0x10) & 0x10000)
 			printf("RAM_MB=512\n");
 		else
