@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -13,6 +14,8 @@
 #include "fpga.h"
 
 #define CONSUMER "lcdmesg"
+
+uint16_t lcd_bias_value;
 
 struct hd44780 {
 	struct gpiod_chip *chip;
@@ -173,13 +176,24 @@ void lcd_init(struct hd44780 *lcd)
 	lcd_returnhome(lcd);
 
 
-	lcd_contrast(12);
+	lcd_contrast(lcd_bias_value);
 }
 
 int main(int argc, char **argv)
 {
 	struct hd44780 lcd;
 	int i = 0;
+	char *contrast = getenv("LCD_CONTRAST");
+
+	/* Contrast can be 0-15.  Default to 12 if not specified. */
+	if(contrast) {
+		lcd_bias_value = atoi(contrast);
+		if(lcd_bias_value > 0xf ) {
+			fprintf(stderr, "LCD Contrast must be 0-15");
+		}
+	} else {
+		lcd_bias_value = 12;
+	}
 
 	lcd_init(&lcd);
 	if (argc == 2) {
