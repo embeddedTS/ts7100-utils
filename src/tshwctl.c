@@ -1,5 +1,5 @@
 /* SPDX-License-Identifier: BSD-2-Clause */
-/* Copyright (c) 2019, Technologic Systems Inc. */
+/* Copyright (c) 2019-2022 Technologic Systems, Inc. dba embeddedTS */
 
 #include <dirent.h> 
 #include <errno.h>
@@ -17,7 +17,7 @@
 #include "fpga.h"
 #include "helpers.h"
 
-const char copyright[] = "Copyright (c) Technologic Systems - " __DATE__ " - "
+const char copyright[] = "Copyright (c) embeddedTS - " __DATE__ " - "
   GITCOMMIT;
 
 int model = 0;
@@ -57,7 +57,7 @@ static void usage(char **argv) {
 	fprintf(stderr,
 	  "%s\n\n"
 	  "Usage: %s [OPTION] ...\n"
-	  "Technologic Systems Hardware access\n"
+	  "embeddedTS Hardware access\n"
 	  "\n"
 	  "  -i, --info             Get info about the SBC\n"
 	  "  -a, --address <addr>   Set syscon addr offset for FPGA peek/poke\n"

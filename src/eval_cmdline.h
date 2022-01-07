@@ -1,5 +1,5 @@
 /* SPDX-License-Identifier: BSD-2-Clause */
-/* Copyright (c) 2019, Technologic Systems Inc. */
+/* Copyright (c) 2019-2022 Technologic Systems, Inc. dba embeddedTS */
 
 #ifndef __EVAL_CMDLINE_H__
 #define __EVAL_CMDLINE_H__

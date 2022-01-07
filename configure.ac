@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT(ts7100-utils, 1.0, support@embeddedarm.com)
+AC_INIT(ts7100-utils, 1.0, support@embeddedTS.com)
 AC_CONFIG_SRCDIR([src/tshwctl.c])
 
 AM_INIT_AUTOMAKE([1.00 foreign no-define])

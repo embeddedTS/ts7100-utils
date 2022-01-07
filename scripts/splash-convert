@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # SPDX-License-Identifier: BSD-2-Clause
-# Copyright (c) 2019 - Technologic Systems Inc.
+# Copyright (c) 2019-2022 Technologic Systems, Inc. dba embeddedTS
 
 # Outputs "splash.out" in current directory that is a 240x320 RGB 565 raw image
 # suitable for TS-7100 LCD splash screen loading.

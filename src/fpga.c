@@ -1,5 +1,5 @@
 /* SPDX-License-Identifier: BSD-2-Clause */
-/* Copyright (c) 2019, Technologic Systems Inc. */
+/* Copyright (c) 2019-2022 Technologic Systems, Inc. dba embeddedTS */
 
 /* This file provides a handful of self-contained memory-mapped FPGA access
  * routines.
