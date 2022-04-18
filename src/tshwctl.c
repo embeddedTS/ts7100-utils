@@ -45,7 +45,7 @@ void do_info(void)
 			printf("FPGA_HASH=\"%x\"\n", fpga_hash);
 
 		printf("OPTS=0x%X\n", fpeek32(0x8) & 0xF);
-		if(fpeek32(0x8) != 0x4)
+		if((fpeek32(0x8) & 0x1) == 0x1)
 			printf("RAM_MB=512\n");
 		else
 			printf("RAM_MB=1024\n");
