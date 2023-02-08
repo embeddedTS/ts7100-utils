@@ -37,6 +37,7 @@ void do_info(void)
 	} else if(model == 0x7250) {
 		uint32_t fpga_rev = fpeek32(0x0);
 		uint32_t fpga_hash = fpeek32(0x4);
+		uint32_t opts = fpeek32(0x8);
 		printf("FPGA_REV=%d\n", fpga_rev & 0x7fffffff);
 
 		if(fpga_rev & (1 << 31))
@@ -44,12 +45,16 @@ void do_info(void)
 		else
 			printf("FPGA_HASH=\"%x\"\n", fpga_hash);
 
-		printf("OPTS=0x%X\n", fpeek32(0x8) & 0xF);
-		if((fpeek32(0x8) & 0x1) == 0x1)
+		printf("OPTS=0x%X\n", opts & 0xF);
+		if((opts & 0x1) == 0x1)
 			printf("RAM_MB=512\n");
 		else
 			printf("RAM_MB=1024\n");
-		printf("PCBREV=A\n");
+
+		if(opts & (1 << 12))
+			printf("PCBREV=C\n");
+		else
+			printf("PCBREV=A\n");
 	}
 }
 
