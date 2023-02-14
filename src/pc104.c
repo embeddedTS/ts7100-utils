@@ -13,8 +13,7 @@
 #include <fcntl.h>
 
 #include "pc104.h"
-
-#define ISA_PATH "/sys/devices/soc0/soc/2100000.aips-bus/21b8000.weim/21b8000.weim:fpga@50000000/50004000.syscon/50004050.fpgaisa/"
+#define ISA_PATH "/sys/bus/platform/devices/50004050.fpgaisa/"
 
 static int io8fd;
 static int io16fd;
