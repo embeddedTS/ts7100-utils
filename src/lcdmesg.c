@@ -115,7 +115,7 @@ void lcd_init(struct hd44780 *lcd)
 	if(model == 0x7250){
 		unsigned int datapins[8] = {10, 9, 12, 11, 16, 15, 18, 17};
 
-		lcd->chip = gpiod_chip_open_by_label("20a4000.gpio");
+		lcd->chip = gpiod_chip_open_by_number(2);
 		assert(lcd->chip);
 		gpiod_line_bulk_init(&lcd->data);
 		ret = gpiod_chip_get_lines(lcd->chip, datapins, 8, &lcd->data);
