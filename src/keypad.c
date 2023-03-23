@@ -92,7 +92,7 @@ int main()
 		return 1;
 	}
 
-	chip = gpiod_chip_open_by_number(5);
+	chip = gpiod_chip_open_by_label("50004010.fpga_gpio");
 	assert(chip);
 	gpiod_line_bulk_init(&dout);
 	gpiod_line_bulk_init(&din);
