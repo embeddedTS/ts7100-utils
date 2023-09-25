@@ -34,7 +34,6 @@ void do_info(void)
 		printf("CPU_OPTS=0x%X\n", eval_cmd("cpu_opts"));
 		printf("IO_OPTS=0x%X\n", eval_cmd("io_opts"));
 		printf("IO_MODEL=0x%X\n", eval_cmd("io_model"));
-
 	} else if(model == 0x7250) {
 		uint32_t fpga_rev = fpeek32(0x0);
 		uint32_t fpga_hash = fpeek32(0x4);
@@ -56,16 +55,22 @@ void do_info(void)
 		else
 			printf("FPGA_HASH=\"%x\"\n", fpga_hash);
 
-		if (straps == 0x1)
+		switch (straps) {
+		case 0x1:
 			printf("MODOPT=\"TS-7250-V3-SMN1I\"\n");
-		else if (straps == 0x2)
+			break;
+		case 0x2:
 			printf("MODOPT=\"TS-7250-V3-SMN2I\"\n");
-		else if (straps == 0x4)
+			break;
+		case 0x4:
 			printf("MODOPT=\"TS-7250-V3-SMW8I\"\n");
-		else if (straps == 0x5)
+			break;
+		case 0x5:
 			printf("MODOPT=\"TS-7250-V3-SXW9I\"\n");
-		else
+			break;
+		default:
 			printf("MODOPT=\"UNKNOWN MODEL\"\n");
+		}
 
 		if (opts & (1 << 0))
 			printf("RAM_MB=512\n");
