@@ -38,20 +38,46 @@ void do_info(void)
 		uint32_t fpga_rev = fpeek32(0x0);
 		uint32_t fpga_hash = fpeek32(0x4);
 		uint32_t opts = fpeek32(0x8);
-		printf("FPGA_REV=%d\n", fpga_rev & 0x7fffffff);
+		uint8_t straps = 0;
 
-		if(fpga_rev & (1 << 31))
+		/*
+		 * Shift bits around to read straps correctly
+		 * R229,R227,R228,R230 (fpga) vs. R229,R227,R228 (sch)
+		 * where R230 is the designated strapping for RAM
+		 */
+		straps = ~(opts >> 1) & 0x7;
+
+		printf("FPGA_REV=%d\n", fpga_rev & 0x7fffffff);
+		printf("OPTS=0x%X\n", straps);
+
+		if (fpga_rev & (1 << 31))
 			printf("FPGA_HASH=\"%x-dirty\"\n", fpga_hash);
 		else
 			printf("FPGA_HASH=\"%x\"\n", fpga_hash);
 
-		printf("OPTS=0x%X\n", opts & 0xF);
-		if((opts & 0x1) == 0x1)
+		switch (straps) {
+		case 0x1:
+			printf("MODOPT=\"TS-7250-V3-SMN1I\"\n");
+			break;
+		case 0x2:
+			printf("MODOPT=\"TS-7250-V3-SMN2I\"\n");
+			break;
+		case 0x4:
+			printf("MODOPT=\"TS-7250-V3-SMW8I\"\n");
+			break;
+		case 0x5:
+			printf("MODOPT=\"TS-7250-V3-SXW9I\"\n");
+			break;
+		default:
+			printf("MODOPT=\"UNKNOWN MODEL\"\n");
+		}
+
+		if (opts & (1 << 0))
 			printf("RAM_MB=512\n");
 		else
 			printf("RAM_MB=1024\n");
 
-		if(opts & (1 << 12))
+		if (opts & (1 << 12))
 			printf("PCBREV=C\n");
 		else
 			printf("PCBREV=A\n");
