@@ -27,5 +27,6 @@ AC_CHECK_FUNCS([bzero getpagesize memset munmap select strstr strtoul strtoull])
 AC_CONFIG_FILES([
 	Makefile 
 	src/Makefile 
+	scripts/Makefile
 ])
 AC_OUTPUT
