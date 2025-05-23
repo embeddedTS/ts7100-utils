@@ -13,7 +13,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include "eval_cmdline.h"
 #include "fpga.h"
 #include "helpers.h"
 
@@ -24,17 +23,34 @@ int model = 0;
 
 void do_info(void)
 {
-	fpga_init(0x50004000);
-	eval_cmd_init();
+	int ret;
 
+	fpga_init(0x50004000);
 	printf("MODEL=%X\n", model);
 
-	if(model == 0x7100) {
-		printf("FPGA_REV=0x%X\n", fpeek32(0x0) >> 16);
-		printf("CPU_OPTS=0x%X\n", eval_cmd("cpu_opts"));
-		printf("IO_OPTS=0x%X\n", eval_cmd("io_opts"));
-		printf("IO_MODEL=0x%X\n", eval_cmd("io_model"));
-	} else if(model == 0x7250) {
+	if (model == 0x7100) {
+		uint32_t cpu_options, io_options, io_model;
+
+		ret = chosen_read_u32("cpu-options", &cpu_options);
+		if (ret) {
+			fprintf(stderr, "cpu-options missing from loaded devicetree.\n"
+							"This may be an outdated U-Boot build.\n");
+			return;
+		}
+
+		ret = chosen_read_u32("io-options", &io_options);
+		if (ret)
+			return;
+
+		ret = chosen_read_u32("io-model", &io_model);
+		if (ret)
+			return;
+
+		printf("FPGA_REV=%d\n", fpeek32(0x0));
+		printf("CPU_OPTS=0x%X\n", cpu_options);
+		printf("IO_OPTS=0x%X\n", io_options);
+		printf("IO_MODEL=0x%X\n", io_model);
+	} else if (model == 0x7250) {
 		uint32_t fpga_rev = fpeek32(0x0);
 		uint32_t fpga_hash = fpeek32(0x4);
 		uint32_t opts = fpeek32(0x8);
