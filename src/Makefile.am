@@ -2,7 +2,7 @@ GITCOMMIT:= $(shell git describe --abbrev=12 --dirty --always)
 
 CFLAGS=-Wall -fno-tree-cselim
 
-tshwctl_SOURCES = tshwctl.c fpga.c eval_cmdline.c helpers.c
+tshwctl_SOURCES = tshwctl.c fpga.c helpers.c
 tshwctl_CPPFLAGS = -DGITCOMMIT="\"${GITCOMMIT}\""
 
 lcdmesg_SOURCES = lcdmesg.c helpers.c fpga.c
