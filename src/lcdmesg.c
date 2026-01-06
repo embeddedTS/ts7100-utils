@@ -10,6 +10,8 @@
 #include <assert.h>
 #include <time.h>
 #include <unistd.h>
+
+#include "gpiod-helper.h"
 #include "helpers.h"
 #include "fpga.h"
 
@@ -18,26 +20,26 @@
 uint16_t lcd_bias_value;
 
 struct hd44780 {
-	struct gpiod_chip *chip;
-	struct gpiod_line_bulk data;
-	struct gpiod_line *en;
-	struct gpiod_line *rs;
-	struct gpiod_line *wr;
+	struct gpiod_line_request *data;
+	struct gpiod_line_request *en;
+	struct gpiod_line_request *rs;
+	struct gpiod_line_request *wr;
 };
 
-void set_8bit_array(int *val, uint8_t data)
+static void set_8bit_array(enum gpiod_line_value *val, uint8_t data)
 {
-	val[0] = data & (1 << 0);
-	val[1] = data & (1 << 1);
-	val[2] = data & (1 << 2);
-	val[3] = data & (1 << 3);
-	val[4] = data & (1 << 4);
-	val[5] = data & (1 << 5);
-	val[6] = data & (1 << 6);
-	val[7] = data & (1 << 7);
+	const enum gpiod_line_value values[2] = {
+				GPIOD_LINE_VALUE_INACTIVE,
+				GPIOD_LINE_VALUE_ACTIVE};
+
+	int i;
+
+	for (i = 0; i < 8; i++) {
+		val[i] = values[!!(data & (1 << i))];
+	}
 }
 
-void nsleep(long int nsec)
+static void nsleep(long int nsec)
 {
 	struct timespec target, leftover;
 	int ret;
@@ -50,34 +52,32 @@ void nsleep(long int nsec)
 		if (errno == -EINTR)
 			nsleep(leftover.tv_nsec);
 }
-uint8_t get_8bit_array(int *val)
+
+static void gpiod_line_request_set_helper(struct gpiod_line_request *line,
+					  int offs,
+					  uint8_t val)
 {
-	uint8_t ret;
-	ret = (val[0] << 0);
-	ret |= (val[1] << 1);
-	ret |= (val[2] << 2);
-	ret |= (val[3] << 3);
-	ret |= (val[4] << 4);
-	ret |= (val[5] << 5);
-	ret |= (val[6] << 6);
-	ret |= (val[7] << 7);
-	return ret;
+	enum gpiod_line_value new_val = (!!val ?
+					 GPIOD_LINE_VALUE_ACTIVE :
+					 GPIOD_LINE_VALUE_INACTIVE);
+
+	gpiod_line_request_set_value(line, offs, new_val);
 }
 
 /* https://www.sparkfun.com/datasheets/LCD/HD44780.pdf
  * Sheet 58 */
-void lcd_write(struct hd44780 *lcd, uint8_t rs, uint8_t data)
+static void lcd_write(struct hd44780 *lcd, uint8_t rs, uint8_t data)
 {
-	int val[8];
+	enum gpiod_line_value val[8];
 	set_8bit_array(val, data);
 
-	gpiod_line_set_value(lcd->rs, rs);
-	gpiod_line_set_value(lcd->wr, 0);
-	gpiod_line_set_value_bulk(&lcd->data, val);
+	gpiod_line_request_set_helper(lcd->rs, 21, rs);
+	gpiod_line_request_set_helper(lcd->wr, 19, 0);
+	gpiod_line_request_set_values(lcd->data, val);
 	nsleep(60); /* tAS */
-	gpiod_line_set_value(lcd->en, 1);
+	gpiod_line_request_set_helper(lcd->en, 20, 1);
 	nsleep(230); /* PWEH */
-	gpiod_line_set_value(lcd->en, 0);
+	gpiod_line_request_set_helper(lcd->en, 20, 0);
 	nsleep(210); /* tH/tAH + tcycE */
 
 	usleep(37);
@@ -85,18 +85,18 @@ void lcd_write(struct hd44780 *lcd, uint8_t rs, uint8_t data)
 
 /* Set a contrast (duty cycle) from 0 (off) to 15 (max).
  * This may need to change depending on the LCD used or the altitude */
-void lcd_contrast(uint8_t duty)
+static void lcd_contrast(uint8_t duty)
 {
 	fpoke32(0x1c, duty & 0xf);
 }
 
-void lcd_writechars(struct hd44780 *lcd, char *dat)
+static void lcd_writechars(struct hd44780 *lcd, char *dat)
 {
 	while(*dat)
 		lcd_write(lcd, 1, *dat++);
 }
 
-void lcd_returnhome(struct hd44780 *lcd)
+static void lcd_returnhome(struct hd44780 *lcd)
 {
 	/* Since we cannot poll busy, the write function waits the typical 37us
 	 * execution time max.  Clear home must wait 1.52ms, but all other
@@ -106,39 +106,45 @@ void lcd_returnhome(struct hd44780 *lcd)
 	usleep(1520);
 }
 
-void lcd_init(struct hd44780 *lcd)
+static void lcd_init(struct hd44780 *lcd)
 {
-	int ret;
 	int model;
+	unsigned int datapins[8] = {10, 9, 12, 11, 16, 15, 18, 17};
+	enum gpiod_line_value value_init[8] = {GPIOD_LINE_VALUE_ACTIVE};
 
 	model = get_model();
-	if(model == 0x7250){
-		unsigned int datapins[8] = {10, 9, 12, 11, 16, 15, 18, 17};
-
-		lcd->chip = gpiod_chip_open_by_number(2);
-		assert(lcd->chip);
-		gpiod_line_bulk_init(&lcd->data);
-		ret = gpiod_chip_get_lines(lcd->chip, datapins, 8, &lcd->data);
-		assert(!ret);
-		lcd->en = gpiod_chip_get_line(lcd->chip, 20);
-		assert(lcd->en);
-		lcd->rs = gpiod_chip_get_line(lcd->chip, 21);
-		assert(lcd->rs);
-		lcd->wr = gpiod_chip_get_line(lcd->chip, 19);
-		assert(lcd->wr);
-	} else {
+	if(model != 0x7250){
 		fprintf(stderr, "Unsupported model 0x%X\n", model);
 		exit(1);
 	}
 
-	fpga_init(0x50004000);
+	lcd->data = request_output_lines("/dev/gpiochip2",
+					 datapins,
+					 value_init,
+					 8,
+					 CONSUMER);
+	lcd->en = request_output_line("/dev/gpiochip2",
+				      20,
+				      GPIOD_LINE_VALUE_ACTIVE,
+				      CONSUMER);
+	lcd->rs = request_output_line("/dev/gpiochip2",
+				      21,
+				      GPIOD_LINE_VALUE_ACTIVE,
+				      CONSUMER);
+	lcd->wr = request_output_line("/dev/gpiochip2",
+				      19,
+				      GPIOD_LINE_VALUE_ACTIVE,
+				      CONSUMER);
 
-	/* Initialize all IO as high */
-	ret = gpiod_line_request_bulk_output(&lcd->data, CONSUMER, NULL);
-	ret |= gpiod_line_request_output(lcd->en, CONSUMER, 1);
-	ret |= gpiod_line_request_output(lcd->rs, CONSUMER, 1);
-	ret |= gpiod_line_request_output(lcd->wr, CONSUMER, 1);
-	assert(!ret);
+	if (lcd->data == NULL ||
+	    lcd->en == NULL ||
+	    lcd->rs == NULL ||
+	    lcd->wr == NULL) {
+		fprintf(stderr, "Unable to open GPIO lines\n");
+		exit(1);
+	}
+
+	fpga_init(0x50004000);
 
 	/* Recover from any potential state to 8-bit mode, and set:
 	 * Function Set
