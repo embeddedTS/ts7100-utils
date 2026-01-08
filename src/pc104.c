@@ -230,6 +230,8 @@ static inline uint32_t get_reg(ucontext_t *ctx, uint8_t rd) {
 	case 14: return ctx->uc_mcontext.arm_lr;
 	case 15: return ctx->uc_mcontext.arm_pc;
 	}
+
+	return 0;
 }
 
 static void fault(int signum, siginfo_t *info, void *vcontext) {
@@ -302,14 +304,15 @@ void *pc104_mmap_init() {
 	    sigaction(SIGBUS, &act, NULL) == -1) {
 		const int retval = errno;
 		fprintf(stderr, "Cannot install fault signal handlers: %s.\n",
-		strerror(retval));
+			strerror(retval));
 		return NULL;
 	}
 
 	bus_space = mmap(NULL, bus_space_sz, PROT_NONE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
 	if (bus_space == MAP_FAILED) {
 		const int retval = errno;
-		fprintf(stderr, "Unable to create fault address space\n");
+		fprintf(stderr, "Unable to create fault address space: %s.\n",
+			strerror(retval));
 		return NULL;
 	}
 	return bus_space;

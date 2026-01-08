@@ -1,2 +1,5 @@
 *.o
 tshwctl
+keypad
+lcdmesg
+pc104_peekpoke

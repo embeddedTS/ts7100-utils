@@ -5,10 +5,10 @@ CFLAGS=-Wall -fno-tree-cselim
 tshwctl_SOURCES = tshwctl.c fpga.c eval_cmdline.c helpers.c
 tshwctl_CPPFLAGS = -DGITCOMMIT="\"${GITCOMMIT}\""
 
-lcdmesg_SOURCES = lcdmesg.c helpers.c fpga.c
+lcdmesg_SOURCES = lcdmesg.c helpers.c fpga.c gpiod-helper.c
 lcdmesg_LDADD = -lgpiod
 
-keypad_SOURCES = keypad.c helpers.c
+keypad_SOURCES = keypad.c helpers.c gpiod-helper.c
 keypad_LDADD = -lgpiod
 
 pc104_peekpoke_SOURCES = pc104_peekpoke.c helpers.c pc104.c
