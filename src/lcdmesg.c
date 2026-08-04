@@ -39,16 +39,13 @@ void set_8bit_array(int *val, uint8_t data)
 
 void nsleep(long int nsec)
 {
-	struct timespec target, leftover;
-	int ret;
+	struct timespec target;
 
 	target.tv_sec = 0;
 	target.tv_nsec = nsec;
 
-	ret = nanosleep(&target, &leftover);
-	if(ret == -1)
-		if (errno == -EINTR)
-			nsleep(leftover.tv_nsec);
+	while (nanosleep(&target, &target) == -1 && errno == EINTR)
+		;
 }
 uint8_t get_8bit_array(int *val)
 {
