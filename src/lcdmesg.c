@@ -41,16 +41,13 @@ static void set_8bit_array(enum gpiod_line_value *val, uint8_t data)
 
 static void nsleep(long int nsec)
 {
-	struct timespec target, leftover;
-	int ret;
+	struct timespec target;
 
 	target.tv_sec = 0;
 	target.tv_nsec = nsec;
 
-	ret = nanosleep(&target, &leftover);
-	if(ret == -1)
-		if (errno == -EINTR)
-			nsleep(leftover.tv_nsec);
+	while (nanosleep(&target, &target) == -1 && errno == EINTR)
+		;
 }
 
 static void gpiod_line_request_set_helper(struct gpiod_line_request *line,
